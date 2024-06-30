@@ -11,32 +11,57 @@ const Search = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [filters, setFilters] = useState({ genre: "", releaseDate: "", popularity: "" });
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleVoiceSearch = async () => {
+    setIsSearching(true);
     toast({
       title: "Voice Search",
-      description: "Voice search functionality will be implemented here.",
+      description: "Listening for your voice input...",
     });
 
     try {
       const response = await axios.post('/api/voice-search', { /* voice data */ });
       setSearchResults(response.data.results);
+      toast({
+        title: "Search Complete",
+        description: "Voice search results are ready.",
+      });
     } catch (error) {
       console.error("Voice search error:", error);
+      toast({
+        title: "Error",
+        description: "Voice search failed. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
     }
   };
 
   const handleTextSearch = async () => {
+    setIsSearching(true);
     toast({
       title: "Text Search",
-      description: "Text search functionality will be implemented here.",
+      description: "Searching for media content...",
     });
 
     try {
       const response = await axios.get('/api/text-search', { params: { query: searchQuery, ...filters } });
       setSearchResults(response.data.results);
+      toast({
+        title: "Search Complete",
+        description: "Text search results are ready.",
+      });
     } catch (error) {
       console.error("Text search error:", error);
+      toast({
+        title: "Error",
+        description: "Text search failed. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -48,13 +73,13 @@ const Search = () => {
     <div className="h-screen w-screen flex flex-col items-center justify-center space-y-4">
       <h1 className="text-3xl text-center">Search Media</h1>
       <div className="space-y-4">
-        <Button variant="outline" onClick={handleVoiceSearch}>
-          Search by Voice
+        <Button variant="outline" onClick={handleVoiceSearch} disabled={isSearching}>
+          {isSearching ? "Listening..." : "Search by Voice"}
         </Button>
         <div className="flex space-x-2">
           <Input placeholder="Type your search here..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-          <Button variant="outline" onClick={handleTextSearch}>
-            Search
+          <Button variant="outline" onClick={handleTextSearch} disabled={isSearching}>
+            {isSearching ? "Searching..." : "Search"}
           </Button>
         </div>
         <div className="flex space-x-2">
