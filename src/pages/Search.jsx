@@ -4,29 +4,40 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import ReactPlayer from "react-player";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import axios from 'axios';
 
 const Search = () => {
   const { toast } = useToast();
   const [searchResults, setSearchResults] = useState([]);
   const [filters, setFilters] = useState({ genre: "", releaseDate: "", popularity: "" });
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const handleVoiceSearch = () => {
+  const handleVoiceSearch = async () => {
     toast({
       title: "Voice Search",
       description: "Voice search functionality will be implemented here.",
     });
+
+    try {
+      const response = await axios.post('/api/voice-search', { /* voice data */ });
+      setSearchResults(response.data.results);
+    } catch (error) {
+      console.error("Voice search error:", error);
+    }
   };
 
-  const handleTextSearch = () => {
+  const handleTextSearch = async () => {
     toast({
       title: "Text Search",
       description: "Text search functionality will be implemented here.",
     });
-    // Mock search results
-    setSearchResults([
-      { id: 1, title: "Sample Media 1", url: "https://www.sample-videos.com/audio/mp3/crowd-cheering.mp3" },
-      { id: 2, title: "Sample Media 2", url: "https://www.sample-videos.com/audio/mp3/wave.mp3" },
-    ]);
+
+    try {
+      const response = await axios.get('/api/text-search', { params: { query: searchQuery, ...filters } });
+      setSearchResults(response.data.results);
+    } catch (error) {
+      console.error("Text search error:", error);
+    }
   };
 
   const handleFilterChange = (filterType, value) => {
@@ -41,7 +52,7 @@ const Search = () => {
           Search by Voice
         </Button>
         <div className="flex space-x-2">
-          <Input placeholder="Type your search here..." />
+          <Input placeholder="Type your search here..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           <Button variant="outline" onClick={handleTextSearch}>
             Search
           </Button>
